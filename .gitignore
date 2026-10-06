@@ -1,0 +1,22 @@
+# course brief and scratch files
+*.pdf
+help.py
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# local secrets / connection strings
+.env
+*.env
+
+# editor / os
+.vscode/
+.DS_Store
+Thumbs.db
+
+# large generated data
+*.csv.gz
+data/generated/
