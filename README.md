@@ -6,19 +6,19 @@ MIT 8103 Advanced Database Systems – Continuous Assessment (2026/2027, First S
 
 ## Case study
 
-Ojougboh General Hospital is a multi-branch general hospital. The database supports patient care (registration, appointments, diagnoses, prescriptions, lab tests), billing, and monthly staff payroll.
+Ojougboh General Hospital is a large general hospital in Agbor, Delta State. The database supports patient care (registration, appointments, diagnoses, prescriptions, lab tests), billing, and monthly staff payroll.
 
-Full case study statement: [portfolio-1-database-design](portfolio-1-database-design/)
+The full case study statement, covering the users, data stored and key operations, is in [Portfolio 1 – Case study](portfolio-1-database-design/README.md#1-case-study-ojougboh-general-hospital).
 
 ## Portfolio activities
 
-| # | Activity | Folder | Status |
-|---|----------|--------|--------|
-| 1 | Database Design and Modelling | [portfolio-1-database-design](portfolio-1-database-design/) | In progress |
-| 2 | Query Processing and Optimisation | – | Not started |
-| 3 | Transactions and Concurrency | – | Not started |
-| 4 | NoSQL and Advanced Data Models | – | Not started |
-| 5 | Distributed and Cloud Database | – | Not started |
+| # | Activity | Folder |
+|---|----------|--------|
+| 1 | Database Design and Modelling | [portfolio-1-database-design](portfolio-1-database-design/) |
+| 2 | Query Processing and Optimisation | – |
+| 3 | Transactions and Concurrency | – |
+| 4 | NoSQL and Advanced Data Models | – |
+| 5 | Distributed and Cloud Database | – |
 
 ## Tools
 
