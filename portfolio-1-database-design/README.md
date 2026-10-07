@@ -60,3 +60,4 @@
 | File | Purpose |
 |------|---------|
 | `schema.sql` | Creates the `hospital` schema: all tables, keys, constraints, triggers and views |
+| `er-diagram.drawio` | ER diagram in seven pages: a module overview, then one page per module (Organisation, Patients, Clinical care, Pharmacy, Billing, Payroll). Open with draw.io or the VS Code Draw.io Integration extension |
