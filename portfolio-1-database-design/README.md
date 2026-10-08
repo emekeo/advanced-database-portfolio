@@ -60,4 +60,5 @@
 | File | Purpose |
 |------|---------|
 | `schema.sql` | Creates the `hospital` schema: all tables, keys, constraints, triggers and views |
+| `seed.sql` | Sample data for every table: 16 staff, 10 patients, appointments, admissions, lab results, prescriptions, pharmacy stock, invoices and the September 2026 payroll. Runs in one transaction and can be re-run safely |
 | `er-diagram.drawio` | ER diagram in seven pages: a module overview, then one page per module (Organisation, Patients, Clinical care, Pharmacy, Billing, Payroll). Open with draw.io or the VS Code Draw.io Integration extension |
