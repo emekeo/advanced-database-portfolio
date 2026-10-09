@@ -116,12 +116,23 @@ psql:portfolio-1-database-design/constraint_tests.sql:206: ERROR:  duplicate key
 ROLLBACK
 
 === TEST 24: Duplicate check before registering "Chiamaka Okonkow" (misspelt) with the same birthday (expect Chiamaka Okonkwo to be found)
-psql:portfolio-1-database-design/constraint_tests.sql:211: ERROR:  function find_possible_duplicate_patients(unknown, unknown, unknown, unknown) does not exist at character 15
+ patient_id |  hospital_no  |    full_name     | date_of_birth |    phone    |            match_reason             | name_similarity 
+------------+---------------+------------------+---------------+-------------+-------------------------------------+-----------------
+          2 | OGH/2026/0002 | Chiamaka Okonkwo | 1992-07-25    | 08061230002 | same date of birth and similar name |             0.7
+(1 row)
+
 
 === TEST 25: Duplicate check for a child registered with an existing patient's phone number (expect a phone match for review)
-psql:portfolio-1-database-design/constraint_tests.sql:215: ERROR:  function find_possible_duplicate_patients(unknown, unknown, unknown, unknown) does not exist at character 15
+ patient_id |  hospital_no  |  full_name   | date_of_birth |    phone    |   match_reason    | name_similarity 
+------------+---------------+--------------+---------------+-------------+-------------------+-----------------
+          3 | OGH/2026/0003 | Efemena Udoh | 2019-11-02    | 08061230003 | same phone number |           0.375
+(1 row)
+
 
 === TEST 26: Duplicate check for a genuinely new patient (expect no matches)
-psql:portfolio-1-database-design/constraint_tests.sql:219: ERROR:  function find_possible_duplicate_patients(unknown, unknown, unknown, unknown) does not exist at character 15
+ patient_id | hospital_no | full_name | date_of_birth | phone | match_reason | name_similarity 
+------------+-------------+-----------+---------------+-------+--------------+-----------------
+(0 rows)
+
 
 === Done. Every test was rolled back, so no data was changed.
