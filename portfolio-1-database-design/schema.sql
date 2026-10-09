@@ -3,6 +3,7 @@ CREATE SCHEMA hospital;
 SET search_path TO hospital;
 
 CREATE EXTENSION IF NOT EXISTS btree_gist SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA public;
 SET search_path TO hospital, public;
 
 CREATE TABLE department (
@@ -331,6 +332,48 @@ CREATE TRIGGER prescription_doctor_check
 CREATE TRIGGER lab_order_doctor_check
     BEFORE INSERT OR UPDATE OF ordered_by ON lab_order
     FOR EACH ROW EXECUTE FUNCTION assert_staff_is_doctor('ordered_by');
+
+CREATE FUNCTION find_possible_duplicate_patients(
+    new_first_name    TEXT,
+    new_last_name     TEXT,
+    new_date_of_birth DATE,
+    new_phone         TEXT
+)
+RETURNS TABLE (
+    patient_id      INT,
+    hospital_no     VARCHAR,
+    full_name       TEXT,
+    date_of_birth   DATE,
+    phone           VARCHAR,
+    match_reason    TEXT,
+    name_similarity REAL
+)
+LANGUAGE sql STABLE
+SET search_path = hospital, public
+AS $$
+    SELECT patient.patient_id,
+           patient.hospital_no,
+           patient.first_name || ' ' || patient.last_name,
+           patient.date_of_birth,
+           patient.phone,
+           CASE
+               WHEN patient.phone = new_phone
+                    THEN 'same phone number'
+               WHEN patient.date_of_birth = new_date_of_birth
+                    THEN 'same date of birth and similar name'
+               ELSE 'very similar name'
+           END,
+           similarity(patient.first_name || ' ' || patient.last_name,
+                      new_first_name || ' ' || new_last_name)
+    FROM patient
+    WHERE patient.phone = new_phone
+       OR (patient.date_of_birth = new_date_of_birth
+           AND similarity(patient.first_name || ' ' || patient.last_name,
+                          new_first_name || ' ' || new_last_name) > 0.3)
+       OR similarity(patient.first_name || ' ' || patient.last_name,
+                     new_first_name || ' ' || new_last_name) > 0.6
+    ORDER BY 7 DESC;
+$$;
 
 CREATE VIEW invoice_balance_view AS
 SELECT invoice.invoice_id,
