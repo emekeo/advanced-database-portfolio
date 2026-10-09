@@ -1,0 +1,127 @@
+SET
+
+=== TEST 1: Book Dr Ese Okoro at 09:15 on 8 Oct, overlapping his 09:00-09:30 slot (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:11: ERROR:  conflicting key value violates exclusion constraint "no_doctor_double_booking"
+ROLLBACK
+
+=== TEST 2: Book Dr Oghenekaro Edafe in the slot freed by a cancelled appointment (expect success)
+BEGIN
+INSERT 0 1
+ROLLBACK
+
+=== TEST 3: Book pharmacist Emeka Ani as the doctor (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:29: ERROR:  staff 12 is not a doctor (appointment.doctor_id)
+ROLLBACK
+
+=== TEST 4: Admit a patient into Male Medical Ward bed B2, which is already occupied (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:40: ERROR:  conflicting key value violates exclusion constraint "no_bed_double_occupancy"
+ROLLBACK
+
+=== TEST 5: Admit Tega Omoregie to another bed while he is still admitted (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:51: ERROR:  duplicate key value violates unique constraint "one_open_admission_per_patient"
+ROLLBACK
+
+=== TEST 6: Record a diagnosis linked to both an appointment and an admission (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:63: ERROR:  new row for relation "diagnosis" violates check constraint "diagnosis_check"
+ROLLBACK
+
+=== TEST 7: Mark the pending lab order as completed without a result (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:71: ERROR:  new row for relation "lab_order" violates check constraint "lab_order_check1"
+ROLLBACK
+
+=== TEST 8: Delete patient Oghenero Akpobome, who has clinical history (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:77: ERROR:  update or delete on table "patient" violates RESTRICT setting of foreign key constraint "patient_condition_patient_id_fkey" on table "patient_condition"
+ROLLBACK
+
+=== TEST 9: Take 50 Salbutamol tablets when only 40 are in stock (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:85: ERROR:  new row for relation "medicine" violates check constraint "medicine_quantity_on_hand_check"
+ROLLBACK
+
+=== TEST 10: Record a dispensed stock movement with no prescription (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:94: ERROR:  new row for relation "stock_movement" violates check constraint "stock_movement_check"
+ROLLBACK
+
+=== TEST 11: Dispense 40 Amlodipine tablets on a prescription for 30 (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:103: ERROR:  new row for relation "prescription_item" violates check constraint "prescription_item_check"
+ROLLBACK
+
+=== TEST 12: Record a payment of -5000 naira (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:112: ERROR:  new row for relation "payment" violates check constraint "payment_amount_check"
+ROLLBACK
+
+=== TEST 13: Create a second September 2026 payslip for Dr Ese Okoro (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:121: ERROR:  duplicate key value violates unique constraint "payslip_payroll_run_id_staff_id_key"
+ROLLBACK
+
+=== TEST 14: Set Dr Ese Okoro's deductions higher than his gross pay (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:130: ERROR:  new row for relation "payslip" violates check constraint "payslip_check"
+ROLLBACK
+
+=== TEST 15: Type in net pay directly instead of letting the database calculate it (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:139: ERROR:  column "net_pay" can only be updated to DEFAULT
+ROLLBACK
+
+=== TEST 16: Give nurse Grace Ikpeba a new licence number with no licensing body or expiry (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:148: ERROR:  new row for relation "staff_profile" violates check constraint "staff_profile_check"
+ROLLBACK
+
+=== TEST 17: Save a 9-digit bank account number for Joy Ofili (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:156: ERROR:  new row for relation "staff" violates check constraint "staff_account_no_check"
+ROLLBACK
+
+=== TEST 18: Register a new patient with hospital number OGH/2026/0001, which already exists (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:163: ERROR:  duplicate key value violates unique constraint "patient_hospital_no_key"
+ROLLBACK
+
+=== TEST 19: Register a different patient with Oghenero Akpobome's NHIS number (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:170: ERROR:  duplicate key value violates unique constraint "patient_nhis_no_key"
+ROLLBACK
+
+=== TEST 20: Create a staff member with staff number OGH-0001, which already exists (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:179: ERROR:  duplicate key value violates unique constraint "staff_staff_no_key"
+ROLLBACK
+
+=== TEST 21: Create a new staff member with Dr Ese Okoro's email address (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:188: ERROR:  duplicate key value violates unique constraint "staff_email_key"
+ROLLBACK
+
+=== TEST 22: Give Dr Tolulope Adebayo the MDCN licence number already held by Dr Ese Okoro (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:197: ERROR:  duplicate key value violates unique constraint "staff_profile_licensing_body_licence_no_key"
+ROLLBACK
+
+=== TEST 23: Record a payment with a bank transfer reference that was already used (expect rejection)
+BEGIN
+psql:portfolio-1-database-design/constraint_tests.sql:206: ERROR:  duplicate key value violates unique constraint "payment_reference_key"
+ROLLBACK
+
+=== TEST 24: Duplicate check before registering "Chiamaka Okonkow" (misspelt) with the same birthday (expect Chiamaka Okonkwo to be found)
+psql:portfolio-1-database-design/constraint_tests.sql:211: ERROR:  function find_possible_duplicate_patients(unknown, unknown, unknown, unknown) does not exist at character 15
+
+=== TEST 25: Duplicate check for a child registered with an existing patient's phone number (expect a phone match for review)
+psql:portfolio-1-database-design/constraint_tests.sql:215: ERROR:  function find_possible_duplicate_patients(unknown, unknown, unknown, unknown) does not exist at character 15
+
+=== TEST 26: Duplicate check for a genuinely new patient (expect no matches)
+psql:portfolio-1-database-design/constraint_tests.sql:219: ERROR:  function find_possible_duplicate_patients(unknown, unknown, unknown, unknown) does not exist at character 15
+
+=== Done. Every test was rolled back, so no data was changed.
