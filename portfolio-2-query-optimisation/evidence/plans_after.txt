@@ -1,0 +1,271 @@
+SET
+
+=== QUERY 1: Visit history for one patient, newest first
+                                                                                 QUERY PLAN                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=59.02..59.04 rows=9 width=66) (actual time=1.296..1.300 rows=24.00 loops=1)
+   Sort Key: appointment.starts_at DESC
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=169 read=50
+   ->  Nested Loop Left Join  (cost=5.49..58.88 rows=9 width=66) (actual time=0.278..1.251 rows=24.00 loops=1)
+         Buffers: shared hit=166 read=50
+         ->  Nested Loop Left Join  (cost=5.35..57.47 rows=9 width=34) (actual time=0.240..1.167 rows=24.00 loops=1)
+               Buffers: shared hit=123 read=49
+               ->  Nested Loop  (cost=4.93..53.14 rows=9 width=34) (actual time=0.217..0.490 rows=24.00 loops=1)
+                     Buffers: shared hit=55 read=23
+                     ->  Nested Loop  (cost=4.79..51.72 rows=9 width=25) (actual time=0.176..0.377 rows=24.00 loops=1)
+                           Buffers: shared hit=8 read=22
+                           ->  Index Scan using patient_hospital_no_key on patient  (cost=0.29..8.31 rows=1 width=4) (actual time=0.022..0.023 rows=1.00 loops=1)
+                                 Index Cond: ((hospital_no)::text = 'OGH/2022/34210'::text)
+                                 Index Searches: 1
+                                 Buffers: shared hit=3
+                           ->  Bitmap Heap Scan on appointment  (cost=4.50..43.31 rows=10 width=29) (actual time=0.150..0.342 rows=24.00 loops=1)
+                                 Recheck Cond: (patient.patient_id = patient_id)
+                                 Heap Blocks: exact=24
+                                 Buffers: shared hit=5 read=22
+                                 ->  Bitmap Index Scan on appointment_patient_starts_at_idx  (cost=0.00..4.50 rows=10 width=0) (actual time=0.062..0.062 rows=24.00 loops=1)
+                                       Index Cond: (patient_id = patient.patient_id)
+                                       Index Searches: 1
+                                       Buffers: shared hit=1 read=2
+                     ->  Index Scan using staff_pkey on staff  (cost=0.14..0.16 rows=1 width=17) (actual time=0.003..0.003 rows=1.00 loops=24)
+                           Index Cond: (staff_id = appointment.doctor_id)
+                           Index Searches: 24
+                           Buffers: shared hit=47 read=1
+               ->  Index Scan using diagnosis_appointment_idx on diagnosis  (cost=0.42..0.47 rows=1 width=8) (actual time=0.027..0.028 rows=0.92 loops=24)
+                     Index Cond: (appointment_id = appointment.appointment_id)
+                     Filter: is_primary
+                     Index Searches: 24
+                     Buffers: shared hit=68 read=26
+         ->  Index Scan using disease_pkey on disease  (cost=0.14..0.15 rows=1 width=21) (actual time=0.002..0.002 rows=0.92 loops=24)
+               Index Cond: (disease_id = diagnosis.disease_id)
+               Index Searches: 22
+               Buffers: shared hit=43 read=1
+ Planning:
+   Buffers: shared hit=556 read=41
+ Planning Time: 17.963 ms
+ Execution Time: 1.386 ms
+(41 rows)
+
+
+=== QUERY 2: Clinic list for one doctor on Monday 14 September 2026
+                                                                                                   QUERY PLAN                                                                                                    
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=74.92..74.94 rows=7 width=77) (actual time=0.436..0.438 rows=11.00 loops=1)
+   Sort Key: appointment.starts_at
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=30 read=15
+   ->  Nested Loop  (cost=4.81..74.82 rows=7 width=77) (actual time=0.129..0.426 rows=11.00 loops=1)
+         Buffers: shared hit=30 read=15
+         ->  Nested Loop  (cost=4.52..38.51 rows=7 width=35) (actual time=0.090..0.126 rows=11.00 loops=1)
+               Buffers: shared hit=8 read=4
+               ->  Seq Scan on staff  (cost=0.00..2.70 rows=1 width=4) (actual time=0.024..0.033 rows=1.00 loops=1)
+                     Filter: ((staff_no)::text = 'OGH-0017'::text)
+                     Rows Removed by Filter: 55
+                     Buffers: shared hit=1 read=1
+               ->  Bitmap Heap Scan on appointment  (cost=4.52..35.73 rows=8 width=39) (actual time=0.065..0.088 rows=11.00 loops=1)
+                     Recheck Cond: ((staff.staff_id = doctor_id) AND (starts_at >= '2026-09-14 00:00:00+01'::timestamp with time zone) AND (starts_at < '2026-09-15 00:00:00+01'::timestamp with time zone))
+                     Heap Blocks: exact=7
+                     Buffers: shared hit=7 read=3
+                     ->  Bitmap Index Scan on appointment_doctor_starts_at_idx  (cost=0.00..4.52 rows=8 width=0) (actual time=0.052..0.052 rows=11.00 loops=1)
+                           Index Cond: ((doctor_id = staff.staff_id) AND (starts_at >= '2026-09-14 00:00:00+01'::timestamp with time zone) AND (starts_at < '2026-09-15 00:00:00+01'::timestamp with time zone))
+                           Index Searches: 1
+                           Buffers: shared read=3
+         ->  Index Scan using patient_pkey on patient  (cost=0.29..5.18 rows=1 width=31) (actual time=0.026..0.026 rows=1.00 loops=11)
+               Index Cond: (patient_id = appointment.patient_id)
+               Index Searches: 11
+               Buffers: shared hit=22 read=11
+ Planning:
+   Buffers: shared hit=41
+ Planning Time: 0.385 ms
+ Execution Time: 0.468 ms
+(28 rows)
+
+
+=== QUERY 3a: Outstanding invoices for one patient, using invoice_balance_view
+                                                                                    QUERY PLAN                                                                                     
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=92606.27..92606.28 rows=3 width=117) (actual time=863.703..863.707 rows=4.00 loops=1)
+   Sort Key: invoice.invoice_no
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=4334 read=15466 written=172
+   ->  Merge Right Join  (cost=44.85..92606.24 rows=3 width=117) (actual time=15.655..863.672 rows=4.00 loops=1)
+         Merge Cond: (payment.invoice_id = invoice.invoice_id)
+         Filter: ((COALESCE((sum(invoice_item.line_total)), '0'::numeric) - COALESCE((sum(payment.amount)), '0'::numeric)) > '0'::numeric)
+         Rows Removed by Filter: 18
+         Buffers: shared hit=4331 read=15466 written=172
+         ->  GroupAggregate  (cost=0.42..18473.98 rows=347648 width=36) (actual time=0.063..202.493 rows=339998.00 loops=1)
+               Group Key: payment.invoice_id
+               Buffers: shared hit=3726 read=931
+               ->  Index Scan using payment_invoice_idx on payment  (cost=0.42..12390.14 rows=347648 width=9) (actual time=0.048..62.876 rows=340000.00 loops=1)
+                     Index Searches: 1
+                     Buffers: shared hit=3726 read=931
+         ->  Materialize  (cost=44.43..69786.53 rows=8 width=57) (actual time=1.374..644.158 rows=22.00 loops=1)
+               Storage: Memory  Maximum Storage: 17kB
+               Buffers: shared hit=605 read=14535 written=172
+               ->  Merge Left Join  (cost=44.43..69786.51 rows=8 width=57) (actual time=1.370..644.059 rows=22.00 loops=1)
+                     Merge Cond: (invoice.invoice_id = invoice_item.invoice_id)
+                     Buffers: shared hit=605 read=14535 written=172
+                     ->  Sort  (cost=44.00..44.02 rows=8 width=25) (actual time=0.149..0.174 rows=22.00 loops=1)
+                           Sort Key: invoice.invoice_id
+                           Sort Method: quicksort  Memory: 26kB
+                           Buffers: shared hit=27 read=1
+                           ->  Nested Loop  (cost=4.77..43.88 rows=8 width=25) (actual time=0.059..0.141 rows=22.00 loops=1)
+                                 Buffers: shared hit=27 read=1
+                                 ->  Index Scan using patient_hospital_no_key on patient  (cost=0.29..8.31 rows=1 width=4) (actual time=0.015..0.016 rows=1.00 loops=1)
+                                       Index Cond: ((hospital_no)::text = 'OGH/2022/34210'::text)
+                                       Index Searches: 1
+                                       Buffers: shared hit=3
+                                 ->  Bitmap Heap Scan on invoice  (cost=4.48..35.50 rows=8 width=29) (actual time=0.042..0.120 rows=22.00 loops=1)
+                                       Recheck Cond: (patient.patient_id = patient_id)
+                                       Heap Blocks: exact=22
+                                       Buffers: shared hit=24 read=1
+                                       ->  Bitmap Index Scan on invoice_patient_idx  (cost=0.00..4.48 rows=8 width=0) (actual time=0.020..0.020 rows=22.00 loops=1)
+                                             Index Cond: (patient_id = patient.patient_id)
+                                             Index Searches: 1
+                                             Buffers: shared hit=2 read=1
+                     ->  GroupAggregate  (cost=0.43..65439.47 rows=344234 width=36) (actual time=0.052..623.600 rows=369438.00 loops=1)
+                           Group Key: invoice_item.invoice_id
+                           Buffers: shared hit=578 read=14534 written=172
+                           ->  Index Scan using invoice_item_pkey on invoice_item  (cost=0.43..55708.42 rows=1085624 width=9) (actual time=0.049..348.795 rows=1061800.00 loops=1)
+                                 Index Searches: 1
+                                 Buffers: shared hit=578 read=14534 written=172
+ Planning:
+   Buffers: shared hit=234 read=20
+ Planning Time: 7.650 ms
+ Execution Time: 863.818 ms
+(49 rows)
+
+
+=== QUERY 3b: Outstanding invoices for one patient, totals worked out per invoice
+                                                                         QUERY PLAN                                                                          
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=207.76..207.76 rows=3 width=117) (actual time=2.810..2.812 rows=4.00 loops=1)
+   Sort Key: invoice.invoice_no
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=120 read=82
+   ->  Nested Loop  (cost=25.21..207.73 rows=3 width=117) (actual time=0.848..2.755 rows=4.00 loops=1)
+         Join Filter: (((COALESCE(sum(invoice_item.line_total), '0'::numeric)) - (COALESCE(sum(payment.amount), '0'::numeric))) > '0'::numeric)
+         Rows Removed by Join Filter: 18
+         Buffers: shared hit=120 read=82
+         ->  Nested Loop  (cost=16.76..139.96 rows=8 width=57) (actual time=0.677..1.771 rows=22.00 loops=1)
+               Buffers: shared hit=53 read=63
+               ->  Nested Loop  (cost=4.77..43.88 rows=8 width=25) (actual time=0.559..1.001 rows=22.00 loops=1)
+                     Buffers: shared hit=3 read=25
+                     ->  Index Scan using patient_hospital_no_key on patient  (cost=0.29..8.31 rows=1 width=4) (actual time=0.097..0.098 rows=1.00 loops=1)
+                           Index Cond: ((hospital_no)::text = 'OGH/2022/34210'::text)
+                           Index Searches: 1
+                           Buffers: shared hit=1 read=2
+                     ->  Bitmap Heap Scan on invoice  (cost=4.48..35.50 rows=8 width=29) (actual time=0.457..0.892 rows=22.00 loops=1)
+                           Recheck Cond: (patient.patient_id = patient_id)
+                           Heap Blocks: exact=22
+                           Buffers: shared hit=2 read=23
+                           ->  Bitmap Index Scan on invoice_patient_idx  (cost=0.00..4.48 rows=8 width=0) (actual time=0.019..0.019 rows=22.00 loops=1)
+                                 Index Cond: (patient_id = patient.patient_id)
+                                 Index Searches: 1
+                                 Buffers: shared hit=2 read=1
+               ->  Aggregate  (cost=11.99..12.00 rows=1 width=32) (actual time=0.034..0.034 rows=1.00 loops=22)
+                     Buffers: shared hit=50 read=38
+                     ->  Index Scan using invoice_item_pkey on invoice_item  (cost=0.43..11.98 rows=3 width=5) (actual time=0.032..0.033 rows=2.64 loops=22)
+                           Index Cond: (invoice_id = invoice.invoice_id)
+                           Index Searches: 22
+                           Buffers: shared hit=50 read=38
+         ->  Aggregate  (cost=8.44..8.45 rows=1 width=32) (actual time=0.044..0.044 rows=1.00 loops=22)
+               Buffers: shared hit=67 read=19
+               ->  Index Scan using payment_invoice_idx on payment  (cost=0.42..8.44 rows=1 width=5) (actual time=0.043..0.043 rows=0.91 loops=22)
+                     Index Cond: (invoice_id = invoice.invoice_id)
+                     Index Searches: 22
+                     Buffers: shared hit=67 read=19
+ Planning:
+   Buffers: shared hit=11 read=4
+ Planning Time: 0.429 ms
+ Execution Time: 2.871 ms
+(40 rows)
+
+
+=== QUERY 4: Ten most common primary diagnoses in September 2026
+                                                                                      QUERY PLAN                                                                                      
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=399.96..399.99 rows=10 width=29) (actual time=8.534..8.538 rows=9.00 loops=1)
+   Buffers: shared hit=7 read=87
+   ->  Sort  (cost=399.96..399.99 rows=11 width=29) (actual time=8.533..8.535 rows=9.00 loops=1)
+         Sort Key: (count(*)) DESC
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=7 read=87
+         ->  HashAggregate  (cost=399.66..399.77 rows=11 width=29) (actual time=8.500..8.504 rows=9.00 loops=1)
+               Group Key: disease.name
+               Batches: 1  Memory Usage: 32kB
+               Buffers: shared hit=4 read=87
+               ->  Hash Join  (cost=1.67..349.52 rows=10028 width=21) (actual time=0.085..5.981 rows=11646.00 loops=1)
+                     Hash Cond: (diagnosis.disease_id = disease.disease_id)
+                     Buffers: shared hit=4 read=87
+                     ->  Index Scan using diagnosis_diagnosed_at_idx on diagnosis  (cost=0.42..311.81 rows=10028 width=4) (actual time=0.051..3.690 rows=11646.00 loops=1)
+                           Index Cond: ((diagnosed_at >= '2026-09-01 00:00:00+01'::timestamp with time zone) AND (diagnosed_at < '2026-10-01 00:00:00+01'::timestamp with time zone))
+                           Filter: is_primary
+                           Index Searches: 1
+                           Buffers: shared hit=3 read=87
+                     ->  Hash  (cost=1.11..1.11 rows=11 width=25) (actual time=0.025..0.026 rows=11.00 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           Buffers: shared hit=1
+                           ->  Seq Scan on disease  (cost=0.00..1.11 rows=11 width=25) (actual time=0.015..0.017 rows=11.00 loops=1)
+                                 Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=27 read=4
+ Planning Time: 0.501 ms
+ Execution Time: 8.597 ms
+(27 rows)
+
+
+=== QUERY 5a: Duplicate check for "Chiamaka Okonkow", as written in find_possible_duplicate_patients
+                                                                                                                                                                           QUERY PLAN                                                                                                                                                                           
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=4105.80..4147.47 rows=16671 width=66) (actual time=160.740..160.743 rows=24.00 loops=1)
+   Sort Key: (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text)) DESC
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=16 read=965
+   ->  Seq Scan on patient  (cost=0.00..2936.74 rows=16671 width=66) (actual time=0.056..160.676 rows=24.00 loops=1)
+         Filter: (((phone)::text = '08099999999'::text) OR ((date_of_birth = '1992-07-25'::date) AND (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.3'::double precision)) OR (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.6'::double precision))
+         Rows Removed by Filter: 49986
+         Buffers: shared hit=13 read=965
+ Planning:
+   Buffers: shared hit=23 read=1
+ Planning Time: 1.690 ms
+ Execution Time: 161.299 ms
+(12 rows)
+
+
+=== QUERY 5b: The same duplicate check written so it can use indexes
+SET
+                                                                                                                                                                           QUERY PLAN                                                                                                                                                                           
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=198.79..198.80 rows=3 width=66) (actual time=2.234..2.237 rows=24.00 loops=1)
+   Sort Key: (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text)) DESC
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=116 read=13
+   ->  Bitmap Heap Scan on patient  (cost=168.52..198.77 rows=3 width=66) (actual time=1.758..2.213 rows=24.00 loops=1)
+         Recheck Cond: (((phone)::text = '08099999999'::text) OR (date_of_birth = '1992-07-25'::date) OR ((((first_name)::text || ' '::text) || (last_name)::text) % 'Chiamaka Okonkow'::text))
+         Rows Removed by Index Recheck: 52
+         Filter: (((phone)::text = '08099999999'::text) OR ((date_of_birth = '1992-07-25'::date) AND (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.3'::double precision)) OR (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.6'::double precision))
+         Rows Removed by Filter: 1
+         Heap Blocks: exact=76
+         Buffers: shared hit=116 read=13
+         ->  BitmapOr  (cost=168.52..168.52 rows=8 width=0) (actual time=1.712..1.713 rows=0.00 loops=1)
+               Buffers: shared hit=40 read=13
+               ->  Bitmap Index Scan on patient_phone_idx  (cost=0.00..4.30 rows=1 width=0) (actual time=0.042..0.042 rows=0.00 loops=1)
+                     Index Cond: ((phone)::text = '08099999999'::text)
+                     Index Searches: 1
+                     Buffers: shared read=2
+               ->  Bitmap Index Scan on patient_date_of_birth_idx  (cost=0.00..4.30 rows=2 width=0) (actual time=0.036..0.036 rows=2.00 loops=1)
+                     Index Cond: (date_of_birth = '1992-07-25'::date)
+                     Index Searches: 1
+                     Buffers: shared read=2
+               ->  Bitmap Index Scan on patient_full_name_trgm_idx  (cost=0.00..159.92 rows=5 width=0) (actual time=1.633..1.633 rows=76.00 loops=1)
+                     Index Cond: ((((first_name)::text || ' '::text) || (last_name)::text) % 'Chiamaka Okonkow'::text)
+                     Index Searches: 1
+                     Buffers: shared hit=40 read=9
+ Planning:
+   Buffers: shared hit=33 read=5 dirtied=1
+ Planning Time: 4.620 ms
+ Execution Time: 2.566 ms
+(29 rows)
+
+RESET

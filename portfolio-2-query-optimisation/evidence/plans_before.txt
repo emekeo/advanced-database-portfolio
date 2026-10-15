@@ -1,0 +1,280 @@
+SET
+
+=== QUERY 1: Visit history for one patient, newest first
+                                                                                     QUERY PLAN                                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Gather Merge  (cost=14009.06..14009.97 rows=8 width=66) (actual time=79.885..84.598 rows=24.00 loops=1)
+   Workers Planned: 1
+   Workers Launched: 1
+   Buffers: shared hit=2518 read=5225
+   ->  Sort  (cost=13009.05..13009.06 rows=5 width=66) (actual time=60.343..60.347 rows=12.00 loops=2)
+         Sort Key: appointment.starts_at DESC
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=2518 read=5225
+         Worker 0:  Sort Method: quicksort  Memory: 25kB
+         ->  Nested Loop Left Join  (cost=7545.90..13008.99 rows=5 width=66) (actual time=31.211..60.315 rows=12.00 loops=2)
+               Buffers: shared hit=2509 read=5225
+               ->  Parallel Hash Right Join  (cost=7545.76..13008.20 rows=5 width=34) (actual time=31.177..60.239 rows=12.00 loops=2)
+                     Hash Cond: (diagnosis.appointment_id = appointment.appointment_id)
+                     Buffers: shared hit=2464 read=5225
+                     ->  Parallel Seq Scan on diagnosis  (cost=0.00..4629.12 rows=222212 width=8) (actual time=0.011..15.372 rows=188880.00 loops=2)
+                           Filter: is_primary
+                           Rows Removed by Filter: 0
+                           Buffers: shared hit=2407
+                     ->  Parallel Hash  (cost=7545.71..7545.71 rows=4 width=34) (actual time=30.325..30.327 rows=12.00 loops=2)
+                           Buckets: 1024  Batches: 1  Memory Usage: 72kB
+                           Buffers: shared hit=57 read=5225
+                           ->  Nested Loop  (cost=8.46..7545.71 rows=4 width=34) (actual time=3.368..30.186 rows=12.00 loops=2)
+                                 Buffers: shared hit=57 read=5225
+                                 ->  Hash Join  (cost=8.32..7545.08 rows=4 width=25) (actual time=3.327..30.065 rows=12.00 loops=2)
+                                       Hash Cond: (appointment.patient_id = patient.patient_id)
+                                       Buffers: shared hit=8 read=5225
+                                       ->  Parallel Seq Scan on appointment  (cost=0.00..7056.27 rows=183027 width=29) (actual time=0.483..13.922 rows=219632.50 loops=2)
+                                             Buffers: shared hit=1 read=5225
+                                       ->  Hash  (cost=8.31..8.31 rows=1 width=4) (actual time=0.052..0.053 rows=1.00 loops=2)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                             Buffers: shared hit=7
+                                             ->  Index Scan using patient_hospital_no_key on patient  (cost=0.29..8.31 rows=1 width=4) (actual time=0.043..0.044 rows=1.00 loops=2)
+                                                   Index Cond: ((hospital_no)::text = 'OGH/2022/34210'::text)
+                                                   Index Searches: 2
+                                                   Buffers: shared hit=7
+                                 ->  Index Scan using staff_pkey on staff  (cost=0.14..0.16 rows=1 width=17) (actual time=0.007..0.007 rows=1.00 loops=24)
+                                       Index Cond: (staff_id = appointment.doctor_id)
+                                       Index Searches: 24
+                                       Buffers: shared hit=49
+               ->  Index Scan using disease_pkey on disease  (cost=0.14..0.15 rows=1 width=21) (actual time=0.004..0.004 rows=0.92 loops=24)
+                     Index Cond: (disease_id = diagnosis.disease_id)
+                     Index Searches: 22
+                     Buffers: shared hit=45
+ Planning:
+   Buffers: shared hit=426 read=29
+ Planning Time: 14.539 ms
+ Execution Time: 84.757 ms
+(47 rows)
+
+
+=== QUERY 2: Clinic list for one doctor on Monday 14 September 2026
+                                                                                 QUERY PLAN                                                                                 
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=8990.98..8991.00 rows=7 width=77) (actual time=38.194..41.442 rows=11.00 loops=1)
+   Sort Key: appointment.starts_at
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=212 read=5049
+   ->  Gather  (cost=1003.00..8990.88 rows=7 width=77) (actual time=31.274..41.431 rows=11.00 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=212 read=5049
+         ->  Nested Loop  (cost=3.00..7990.18 rows=3 width=77) (actual time=10.315..10.595 rows=3.67 loops=3)
+               Buffers: shared hit=212 read=5049
+               ->  Hash Join  (cost=2.71..7974.55 rows=3 width=35) (actual time=10.298..10.520 rows=3.67 loops=3)
+                     Hash Cond: (appointment.doctor_id = staff.staff_id)
+                     Buffers: shared hit=190 read=5038
+                     ->  Parallel Seq Scan on appointment  (cost=0.00..7971.41 rows=152 width=39) (actual time=10.254..10.465 rows=203.67 loops=3)
+                           Filter: ((starts_at >= '2026-09-14 00:00:00+01'::timestamp with time zone) AND (starts_at < '2026-09-15 00:00:00+01'::timestamp with time zone))
+                           Rows Removed by Filter: 146218
+                           Buffers: shared hit=189 read=5037
+                     ->  Hash  (cost=2.70..2.70 rows=1 width=4) (actual time=0.114..0.115 rows=1.00 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                           Buffers: shared hit=1 read=1
+                           ->  Seq Scan on staff  (cost=0.00..2.70 rows=1 width=4) (actual time=0.020..0.106 rows=1.00 loops=1)
+                                 Filter: ((staff_no)::text = 'OGH-0017'::text)
+                                 Rows Removed by Filter: 55
+                                 Buffers: shared hit=1 read=1
+               ->  Index Scan using patient_pkey on patient  (cost=0.29..5.21 rows=1 width=31) (actual time=0.019..0.019 rows=1.00 loops=11)
+                     Index Cond: (patient_id = appointment.patient_id)
+                     Index Searches: 11
+                     Buffers: shared hit=22 read=11
+ Planning:
+   Buffers: shared hit=31 read=1
+ Planning Time: 1.032 ms
+ Execution Time: 41.518 ms
+(32 rows)
+
+
+=== QUERY 3a: Outstanding invoices for one patient, using invoice_balance_view
+                                                                                     QUERY PLAN                                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=118250.62..118250.62 rows=3 width=118) (actual time=905.829..905.936 rows=4.00 loops=1)
+   Sort Key: invoice.invoice_no
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=7863 read=14506, temp read=1197 written=2963
+   ->  Merge Right Join  (cost=48508.47..118250.59 rows=3 width=118) (actual time=387.944..905.898 rows=4.00 loops=1)
+         Merge Cond: (invoice_item.invoice_id = invoice.invoice_id)
+         Filter: ((COALESCE((sum(invoice_item.line_total)), '0'::numeric) - COALESCE((sum(payment.amount)), '0'::numeric)) > '0'::numeric)
+         Rows Removed by Filter: 18
+         Buffers: shared hit=7860 read=14506, temp read=1197 written=2963
+         ->  GroupAggregate  (cost=0.43..65439.47 rows=344234 width=36) (actual time=0.078..509.892 rows=369439.00 loops=1)
+               Group Key: invoice_item.invoice_id
+               Buffers: shared hit=606 read=14506
+               ->  Index Scan using invoice_item_pkey on invoice_item  (cost=0.43..55708.42 rows=1085624 width=9) (actual time=0.061..259.653 rows=1061802.00 loops=1)
+                     Index Searches: 1
+                     Buffers: shared hit=606 read=14506
+         ->  Sort  (cost=48508.05..48508.07 rows=8 width=58) (actual time=377.570..377.688 rows=22.00 loops=1)
+               Sort Key: invoice.invoice_id
+               Sort Method: quicksort  Memory: 26kB
+               Buffers: shared hit=7254, temp read=1197 written=2963
+               ->  Hash Right Join  (cost=35987.10..48507.93 rows=8 width=58) (actual time=168.055..377.633 rows=22.00 loops=1)
+                     Hash Cond: (payment.invoice_id = invoice.invoice_id)
+                     Buffers: shared hit=7254, temp read=1197 written=2963
+                     ->  HashAggregate  (cost=29095.68..36836.28 rows=347648 width=36) (actual time=125.429..318.063 rows=347647.00 loops=1)
+                           Group Key: payment.invoice_id
+                           Planned Partitions: 16  Batches: 17  Memory Usage: 8337kB  Disk Usage: 14992kB
+                           Buffers: shared hit=3348, temp read=1197 written=2963
+                           ->  Seq Scan on payment  (cost=0.00..6824.48 rows=347648 width=9) (actual time=0.027..19.052 rows=347648.00 loops=1)
+                                 Buffers: shared hit=3348
+                     ->  Hash  (cost=6891.32..6891.32 rows=8 width=26) (actual time=40.559..40.663 rows=22.00 loops=1)
+                           Buckets: 1024  Batches: 1  Memory Usage: 10kB
+                           Buffers: shared hit=3906
+                           ->  Gather  (cost=1008.32..6891.32 rows=8 width=26) (actual time=0.490..40.634 rows=22.00 loops=1)
+                                 Workers Planned: 2
+                                 Workers Launched: 2
+                                 Buffers: shared hit=3906
+                                 ->  Hash Join  (cost=8.32..5890.52 rows=3 width=26) (actual time=1.821..16.502 rows=7.33 loops=3)
+                                       Hash Cond: (invoice.patient_id = patient.patient_id)
+                                       Buffers: shared hit=3906
+                                       ->  Parallel Seq Scan on invoice  (cost=0.00..5468.99 rows=157399 width=30) (actual time=0.007..7.105 rows=125919.33 loops=3)
+                                             Buffers: shared hit=3895
+                                       ->  Hash  (cost=8.31..8.31 rows=1 width=4) (actual time=0.033..0.034 rows=1.00 loops=3)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                             Buffers: shared hit=11
+                                             ->  Index Scan using patient_hospital_no_key on patient  (cost=0.29..8.31 rows=1 width=4) (actual time=0.027..0.027 rows=1.00 loops=3)
+                                                   Index Cond: ((hospital_no)::text = 'OGH/2022/34210'::text)
+                                                   Index Searches: 3
+                                                   Buffers: shared hit=11
+ Planning:
+   Buffers: shared hit=210 read=10
+ Planning Time: 4.039 ms
+ Execution Time: 920.912 ms
+(51 rows)
+
+
+=== QUERY 3b: Outstanding invoices for one patient, totals worked out per invoice
+                                                                               QUERY PLAN                                                                               
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=14596.16..68536.62 rows=3 width=118) (actual time=212.566..543.404 rows=4.00 loops=1)
+   Join Filter: (((COALESCE(sum(invoice_item.line_total), '0'::numeric)) - (COALESCE(sum(payment.amount), '0'::numeric))) > '0'::numeric)
+   Rows Removed by Join Filter: 18
+   Buffers: shared hit=73735 read=3929
+   ->  Nested Loop  (cost=6902.55..6987.58 rows=8 width=58) (actual time=177.367..178.993 rows=22.00 loops=1)
+         Buffers: shared hit=79 read=3929
+         ->  Gather Merge  (cost=6890.56..6891.50 rows=8 width=26) (actual time=177.224..177.475 rows=22.00 loops=1)
+               Workers Planned: 2
+               Workers Launched: 2
+               Buffers: shared hit=25 read=3895
+               ->  Sort  (cost=5890.54..5890.55 rows=3 width=26) (actual time=19.282..19.290 rows=7.33 loops=3)
+                     Sort Key: invoice.invoice_no
+                     Sort Method: quicksort  Memory: 25kB
+                     Buffers: shared hit=25 read=3895
+                     Worker 0:  Sort Method: quicksort  Memory: 25kB
+                     Worker 1:  Sort Method: quicksort  Memory: 25kB
+                     ->  Hash Join  (cost=8.32..5890.52 rows=3 width=26) (actual time=2.228..19.194 rows=7.33 loops=3)
+                           Hash Cond: (invoice.patient_id = patient.patient_id)
+                           Buffers: shared hit=7 read=3895
+                           ->  Parallel Seq Scan on invoice  (cost=0.00..5468.99 rows=157399 width=30) (actual time=0.360..9.064 rows=125919.33 loops=3)
+                                 Buffers: shared read=3895
+                           ->  Hash  (cost=8.31..8.31 rows=1 width=4) (actual time=0.040..0.040 rows=1.00 loops=2)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                 Buffers: shared hit=7
+                                 ->  Index Scan using patient_hospital_no_key on patient  (cost=0.29..8.31 rows=1 width=4) (actual time=0.033..0.034 rows=1.00 loops=2)
+                                       Index Cond: ((hospital_no)::text = 'OGH/2022/34210'::text)
+                                       Index Searches: 2
+                                       Buffers: shared hit=7
+         ->  Aggregate  (cost=11.99..12.00 rows=1 width=32) (actual time=0.066..0.066 rows=1.00 loops=22)
+               Buffers: shared hit=54 read=34
+               ->  Index Scan using invoice_item_pkey on invoice_item  (cost=0.43..11.98 rows=3 width=5) (actual time=0.058..0.059 rows=2.64 loops=22)
+                     Index Cond: (invoice_id = invoice.invoice_id)
+                     Index Searches: 22
+                     Buffers: shared hit=54 read=34
+   ->  Aggregate  (cost=7693.60..7693.61 rows=1 width=32) (actual time=16.560..16.561 rows=1.00 loops=22)
+         Buffers: shared hit=73656
+         ->  Seq Scan on payment  (cost=0.00..7693.60 rows=1 width=5) (actual time=7.151..16.544 rows=0.91 loops=22)
+               Filter: (invoice_id = invoice.invoice_id)
+               Rows Removed by Filter: 347647
+               Buffers: shared hit=73656
+ Planning:
+   Buffers: shared hit=7
+ Planning Time: 0.302 ms
+ Execution Time: 543.483 ms
+(44 rows)
+
+
+=== QUERY 4: Ten most common primary diagnoses in September 2026
+                                                                                                    QUERY PLAN                                                                                                     
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=6803.04..6803.07 rows=10 width=29) (actual time=39.715..43.557 rows=9.00 loops=1)
+   Buffers: shared hit=13 read=2407
+   ->  Sort  (cost=6803.04..6803.07 rows=11 width=29) (actual time=39.713..43.554 rows=9.00 loops=1)
+         Sort Key: (count(*)) DESC
+         Sort Method: quicksort  Memory: 25kB
+         Buffers: shared hit=13 read=2407
+         ->  Finalize GroupAggregate  (cost=6800.48..6802.85 rows=11 width=29) (actual time=39.693..43.538 rows=9.00 loops=1)
+               Group Key: disease.name
+               Buffers: shared hit=10 read=2407
+               ->  Gather Merge  (cost=6800.48..6802.65 rows=19 width=29) (actual time=39.685..43.528 rows=9.00 loops=1)
+                     Workers Planned: 1
+                     Workers Launched: 1
+                     Buffers: shared hit=10 read=2407
+                     ->  Sort  (cost=5800.47..5800.50 rows=11 width=29) (actual time=16.949..16.951 rows=4.50 loops=2)
+                           Sort Key: disease.name
+                           Sort Method: quicksort  Memory: 25kB
+                           Buffers: shared hit=10 read=2407
+                           Worker 0:  Sort Method: quicksort  Memory: 25kB
+                           ->  Partial HashAggregate  (cost=5800.17..5800.28 rows=11 width=29) (actual time=16.909..16.912 rows=4.50 loops=2)
+                                 Group Key: disease.name
+                                 Batches: 1  Memory Usage: 32kB
+                                 Buffers: shared hit=1 read=2407
+                                 Worker 0:  Batches: 1  Memory Usage: 32kB
+                                 ->  Hash Join  (cost=1.25..5766.16 rows=6802 width=21) (actual time=14.614..15.953 rows=5823.00 loops=2)
+                                       Hash Cond: (diagnosis.disease_id = disease.disease_id)
+                                       Buffers: shared hit=1 read=2407
+                                       ->  Parallel Seq Scan on diagnosis  (cost=0.00..5740.19 rows=6802 width=4) (actual time=14.594..15.148 rows=5823.00 loops=2)
+                                             Filter: (is_primary AND (diagnosed_at >= '2026-09-01 00:00:00+01'::timestamp with time zone) AND (diagnosed_at < '2026-10-01 00:00:00+01'::timestamp with time zone))
+                                             Rows Removed by Filter: 183058
+                                             Buffers: shared read=2407
+                                       ->  Hash  (cost=1.11..1.11 rows=11 width=25) (actual time=0.022..0.023 rows=11.00 loops=1)
+                                             Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                             Buffers: shared hit=1
+                                             ->  Seq Scan on disease  (cost=0.00..1.11 rows=11 width=25) (actual time=0.015..0.016 rows=11.00 loops=1)
+                                                   Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=26 read=2
+ Planning Time: 0.206 ms
+ Execution Time: 43.620 ms
+(39 rows)
+
+
+=== QUERY 5a: Duplicate check for "Chiamaka Okonkow", as written in find_possible_duplicate_patients
+                                                                                                                                                                           QUERY PLAN                                                                                                                                                                           
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=4105.80..4147.47 rows=16671 width=66) (actual time=150.107..150.109 rows=24.00 loops=1)
+   Sort Key: (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text)) DESC
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=5 read=976
+   ->  Seq Scan on patient  (cost=0.00..2936.74 rows=16671 width=66) (actual time=0.068..150.041 rows=24.00 loops=1)
+         Filter: (((phone)::text = '08099999999'::text) OR ((date_of_birth = '1992-07-25'::date) AND (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.3'::double precision)) OR (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.6'::double precision))
+         Rows Removed by Filter: 49986
+         Buffers: shared hit=2 read=976
+ Planning:
+   Buffers: shared hit=19 read=2
+ Planning Time: 0.653 ms
+ Execution Time: 150.492 ms
+(12 rows)
+
+
+=== QUERY 5b: The same duplicate check written so it can use indexes
+SET
+                                                                                                                                                                                                                                                                  QUERY PLAN                                                                                                                                                                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=3361.78..3362.20 rows=168 width=66) (actual time=159.146..159.148 rows=24.00 loops=1)
+   Sort Key: (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text)) DESC
+   Sort Method: quicksort  Memory: 26kB
+   Buffers: shared hit=978
+   ->  Seq Scan on patient  (cost=0.00..3355.58 rows=168 width=66) (actual time=0.031..159.103 rows=24.00 loops=1)
+         Filter: ((((phone)::text = '08099999999'::text) OR (date_of_birth = '1992-07-25'::date) OR ((((first_name)::text || ' '::text) || (last_name)::text) % 'Chiamaka Okonkow'::text)) AND (((phone)::text = '08099999999'::text) OR ((date_of_birth = '1992-07-25'::date) AND (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.3'::double precision)) OR (similarity((((first_name)::text || ' '::text) || (last_name)::text), 'Chiamaka Okonkow'::text) > '0.6'::double precision)))
+         Rows Removed by Filter: 49986
+         Buffers: shared hit=978
+ Planning Time: 0.342 ms
+ Execution Time: 159.175 ms
+(10 rows)
+
+RESET

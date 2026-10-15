@@ -1,0 +1,145 @@
+SET
+
+=== QUERY 1: Visit history for one patient, newest first
+       starts_at        |  status   |        doctor        |    primary_diagnosis     
+------------------------+-----------+----------------------+--------------------------
+ 2026-09-09 10:00:00+01 | completed | Ese Okoro            | Malaria
+ 2026-07-29 15:30:00+01 | no_show   | Peter Nnamdi         | 
+ 2026-07-09 09:00:00+01 | completed | Vivian Oseghale      | Acute gastroenteritis
+ 2026-06-19 15:00:00+01 | completed | Paul Igbinedion      | Malaria
+ 2026-04-14 08:30:00+01 | completed | Ebere Onyeka         | Urinary tract infection
+ 2026-02-12 08:30:00+01 | cancelled | Paul Igbinedion      | 
+ 2025-12-05 10:00:00+01 | completed | Jude Omokaro         | Malaria
+ 2025-09-08 14:30:00+01 | completed | Chukwuemeka Nwosu    | Hypertension
+ 2025-05-20 12:30:00+01 | completed | Precious Ogbonna     | Malaria
+ 2025-05-15 14:30:00+01 | completed | Emeka Idahosa        | Acute gastroenteritis
+ 2025-02-06 13:30:00+01 | completed | Ruth Igbinedion      | Acute gastroenteritis
+ 2025-01-28 15:00:00+01 | completed | Ruth Igbinedion      | Malaria
+ 2024-12-26 13:30:00+01 | completed | Gift Oyelaran        | Asthma
+ 2024-08-16 08:00:00+01 | completed | Ebere Onyeka         | Typhoid fever
+ 2024-07-26 14:30:00+01 | completed | Ifeoma Obi           | Type 2 diabetes mellitus
+ 2024-07-24 15:30:00+01 | completed | Femi Omoregie        | Urinary tract infection
+ 2024-07-05 15:00:00+01 | completed | Uyi Eruotor          | Acute gastroenteritis
+ 2024-06-03 13:30:00+01 | completed | Oghenetega Nwachukwu | Typhoid fever
+ 2024-03-27 11:00:00+01 | completed | Rose Ojo             | Asthma
+ 2024-02-16 14:30:00+01 | completed | Ebere Edafe          | Asthma
+ 2024-02-02 10:30:00+01 | completed | Ebere Udoh           | Urinary tract infection
+ 2024-01-22 10:30:00+01 | completed | Oghenero Okocha      | Urinary tract infection
+ 2024-01-18 11:30:00+01 | completed | Vivian Oseghale      | Pneumonia
+ 2024-01-02 13:00:00+01 | completed | Ebere Udoh           | Malaria
+(24 rows)
+
+
+=== QUERY 2: Clinic list for one doctor on Monday 14 September 2026
+       starts_at        |  hospital_no   |       patient       |  status   |         reason         
+------------------------+----------------+---------------------+-----------+------------------------
+ 2026-09-14 08:00:00+01 | OGH/2018/24610 | Chukwuemeka Nnamdi  | completed | Routine review
+ 2026-09-14 08:30:00+01 | OGH/2019/19060 | Mary Obi            | completed | Fever
+ 2026-09-14 09:30:00+01 | OGH/2023/13423 | Rita Okonkwo        | completed | Cough
+ 2026-09-14 10:00:00+01 | OGH/2020/17620 | Yetunde Osagie      | completed | Follow-up visit
+ 2026-09-14 10:30:00+01 | OGH/2022/19683 | Chidi Okeke         | cancelled | Weakness and dizziness
+ 2026-09-14 11:00:00+01 | OGH/2021/22663 | Comfort Ogbonna     | completed | Routine review
+ 2026-09-14 11:30:00+01 | OGH/2021/03209 | Mary Okocha         | completed | Fever
+ 2026-09-14 12:30:00+01 | OGH/2022/29997 | Chukwuemeka Efemuai | completed | Weakness and dizziness
+ 2026-09-14 13:00:00+01 | OGH/2020/38699 | Ruth Ehiede         | completed | Fever and vomiting
+ 2026-09-14 14:00:00+01 | OGH/2018/02471 | Felix Efemuai       | completed | Routine review
+ 2026-09-14 14:30:00+01 | OGH/2023/04041 | Omotola Nwanze      | completed | Routine review
+(11 rows)
+
+
+=== QUERY 3a: Outstanding invoices for one patient, using invoice_balance_view
+    invoice_no    |  status   | total_amount | amount_paid | balance 
+------------------+-----------+--------------+-------------+---------
+ INV-2024-0008347 | issued    |      8750.00 |           0 | 8750.00
+ INV-2025-0221383 | part_paid |     12860.00 |     6430.00 | 6430.00
+ INV-2025-0308744 | part_paid |     11360.00 |     5680.00 | 5680.00
+ INV-2026-0402766 | issued    |      9700.00 |           0 | 9700.00
+(4 rows)
+
+
+=== QUERY 3b: Outstanding invoices for one patient, totals worked out per invoice
+    invoice_no    |  status   | total_amount | amount_paid | balance 
+------------------+-----------+--------------+-------------+---------
+ INV-2024-0008347 | issued    |      8750.00 |           0 | 8750.00
+ INV-2025-0221383 | part_paid |     12860.00 |     6430.00 | 6430.00
+ INV-2025-0308744 | part_paid |     11360.00 |     5680.00 | 5680.00
+ INV-2026-0402766 | issued    |      9700.00 |           0 | 9700.00
+(4 rows)
+
+
+=== QUERY 4: Ten most common primary diagnoses in September 2026
+           name           | icd10_code | cases 
+--------------------------+------------+-------
+ Malaria                  | B54        |  4059
+ Typhoid fever            | A01.0      |  1530
+ Hypertension             | I10        |  1474
+ Urinary tract infection  | N39.0      |  1013
+ Acute gastroenteritis    | A09        |   995
+ Type 2 diabetes mellitus | E11        |   965
+ Pneumonia                | J18        |   554
+ Asthma                   | J45        |   546
+ Sickle cell disorder     | D57        |   510
+(9 rows)
+
+
+=== QUERY 5a: Duplicate check for "Chiamaka Okonkow", as written in find_possible_duplicate_patients
+  hospital_no   |    full_name     | date_of_birth |    phone    | name_similarity 
+----------------+------------------+---------------+-------------+-----------------
+ OGH/2023/29381 | Chiamaka Okonkwo | 2009-05-12    | 09058626177 |             0.7
+ OGH/2018/01958 | Chiamaka Okonkwo | 1974-08-30    | 07036111316 |             0.7
+ OGH/2018/49852 | Chiamaka Okonkwo | 1945-07-13    | 09053361671 |             0.7
+ OGH/2019/07979 | Chiamaka Okonkwo | 2008-07-08    | 07032188260 |             0.7
+ OGH/2019/13907 | Chiamaka Okonkwo | 2014-04-05    | 08164938945 |             0.7
+ OGH/2019/10785 | Chiamaka Okonkwo | 1972-06-16    | 07060794412 |             0.7
+ OGH/2019/30827 | Chiamaka Okonkwo | 1978-01-19    | 09050159868 |             0.7
+ OGH/2019/02551 | Chiamaka Okonkwo | 1951-02-11    | 08139174429 |             0.7
+ OGH/2021/14521 | Chiamaka Okonkwo | 1960-06-29    | 07067826728 |             0.7
+ OGH/2021/17120 | Chiamaka Okonkwo | 1966-08-06    | 07035705825 |             0.7
+ OGH/2026/0002  | Chiamaka Okonkwo | 1992-07-25    | 08061230002 |             0.7
+ OGH/2021/45211 | Chiamaka Okoro   | 1987-06-15    | 07060716164 |             0.6
+ OGH/2022/27783 | Chiamaka Okoro   | 1970-07-12    | 07066644364 |             0.6
+ OGH/2021/00893 | Chiamaka Okoro   | 1976-02-15    | 07039481263 |             0.6
+ OGH/2020/05543 | Chiamaka Okoro   | 1944-05-26    | 07068244517 |             0.6
+ OGH/2018/25634 | Chiamaka Okoro   | 1986-07-06    | 08138274120 |             0.6
+ OGH/2020/34713 | Chiamaka Okoro   | 2003-10-24    | 08035769348 |             0.6
+ OGH/2018/48652 | Chiamaka Okoro   | 1972-07-23    | 09051563270 |             0.6
+ OGH/2018/21060 | Chiamaka Okoro   | 2014-03-28    | 08131128148 |             0.6
+ OGH/2019/19228 | Chiamaka Okoro   | 2009-09-14    | 08164950310 |             0.6
+ OGH/2020/07405 | Chiamaka Okoro   | 1986-02-10    | 07060552613 |             0.6
+ OGH/2019/36026 | Chiamaka Okoro   | 1986-09-10    | 07068063529 |             0.6
+ OGH/2019/37626 | Chiamaka Okoro   | 2009-02-19    | 08164616628 |             0.6
+ OGH/2020/16716 | Chiamaka Okoro   | 1940-10-30    | 08166546534 |             0.6
+(24 rows)
+
+
+=== QUERY 5b: The same duplicate check written so it can use indexes
+SET
+  hospital_no   |    full_name     | date_of_birth |    phone    | name_similarity 
+----------------+------------------+---------------+-------------+-----------------
+ OGH/2023/29381 | Chiamaka Okonkwo | 2009-05-12    | 09058626177 |             0.7
+ OGH/2018/01958 | Chiamaka Okonkwo | 1974-08-30    | 07036111316 |             0.7
+ OGH/2018/49852 | Chiamaka Okonkwo | 1945-07-13    | 09053361671 |             0.7
+ OGH/2019/07979 | Chiamaka Okonkwo | 2008-07-08    | 07032188260 |             0.7
+ OGH/2019/13907 | Chiamaka Okonkwo | 2014-04-05    | 08164938945 |             0.7
+ OGH/2019/10785 | Chiamaka Okonkwo | 1972-06-16    | 07060794412 |             0.7
+ OGH/2019/30827 | Chiamaka Okonkwo | 1978-01-19    | 09050159868 |             0.7
+ OGH/2019/02551 | Chiamaka Okonkwo | 1951-02-11    | 08139174429 |             0.7
+ OGH/2021/14521 | Chiamaka Okonkwo | 1960-06-29    | 07067826728 |             0.7
+ OGH/2021/17120 | Chiamaka Okonkwo | 1966-08-06    | 07035705825 |             0.7
+ OGH/2026/0002  | Chiamaka Okonkwo | 1992-07-25    | 08061230002 |             0.7
+ OGH/2021/45211 | Chiamaka Okoro   | 1987-06-15    | 07060716164 |             0.6
+ OGH/2022/27783 | Chiamaka Okoro   | 1970-07-12    | 07066644364 |             0.6
+ OGH/2021/00893 | Chiamaka Okoro   | 1976-02-15    | 07039481263 |             0.6
+ OGH/2020/05543 | Chiamaka Okoro   | 1944-05-26    | 07068244517 |             0.6
+ OGH/2018/25634 | Chiamaka Okoro   | 1986-07-06    | 08138274120 |             0.6
+ OGH/2020/34713 | Chiamaka Okoro   | 2003-10-24    | 08035769348 |             0.6
+ OGH/2018/48652 | Chiamaka Okoro   | 1972-07-23    | 09051563270 |             0.6
+ OGH/2018/21060 | Chiamaka Okoro   | 2014-03-28    | 08131128148 |             0.6
+ OGH/2019/19228 | Chiamaka Okoro   | 2009-09-14    | 08164950310 |             0.6
+ OGH/2020/07405 | Chiamaka Okoro   | 1986-02-10    | 07060552613 |             0.6
+ OGH/2019/36026 | Chiamaka Okoro   | 1986-09-10    | 07068063529 |             0.6
+ OGH/2019/37626 | Chiamaka Okoro   | 2009-02-19    | 08164616628 |             0.6
+ OGH/2020/16716 | Chiamaka Okoro   | 1940-10-30    | 08166546534 |             0.6
+(24 rows)
+
+RESET
