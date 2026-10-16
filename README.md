@@ -17,10 +17,11 @@ The full case study statement, covering the users, data stored and key operation
 | 1 | Database Design and Modelling | [portfolio-1-database-design](portfolio-1-database-design/) |
 | 2 | Query Processing and Optimisation | [portfolio-2-query-optimisation](portfolio-2-query-optimisation/) |
 | 3 | Transactions and Concurrency | [portfolio-3-transactions-concurrency](portfolio-3-transactions-concurrency/) |
-| 4 | NoSQL and Advanced Data Models | – |
+| 4 | NoSQL and Advanced Data Models | [portfolio-4-nosql](portfolio-4-nosql/) |
 | 5 | Distributed and Cloud Database | – |
 
 ## Tools
 
 - PostgreSQL 18 (portfolios 1–3)
-- MongoDB Atlas + mongosh (portfolios 4–5)
+- MongoDB Community Server + mongosh (portfolio 4)
+- MongoDB Atlas (portfolio 5)

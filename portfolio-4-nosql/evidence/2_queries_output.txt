@@ -1,0 +1,220 @@
+=== Q1: Full clinical record for inpatient OGH/2026/0005, newest first (one read, no joins)
+[
+  {
+    encounter_type: 'admission',
+    recorded_at: ISODate('2026-10-05T10:00:00.000Z'),
+    ward: 'Male Medical Ward',
+    notes: {
+      progress: [
+        {
+          text: 'Chest X-ray confirms right lower lobe pneumonia. Continue ceftriaxone.'
+        },
+        {
+          text: 'Off oxygen. Fever settling, blood sugar improving on metformin.'
+        },
+        {
+          text: 'Comfortable, walking on the ward. Plan discharge after the 7-day ceftriaxone course.'
+        }
+      ]
+    }
+  },
+  {
+    encounter_type: 'outpatient',
+    recorded_at: ISODate('2026-10-05T09:00:00.000Z'),
+    notes: {
+      plan: 'Pneumonia in a diabetic. Admit to Male Medical Ward for IV ceftriaxone and oxygen. Check blood sugar four times a day.'
+    }
+  }
+]
+
+=== Q2: Latest vitals reading for OGH/2026/0005
+[
+  {
+    hospital_no: 'OGH/2026/0005',
+    vitals: {
+      taken_at: ISODate('2026-10-12T07:00:00.000Z'),
+      taken_by: 'OGH-0007',
+      temperature_c: 36.8,
+      pulse_bpm: 80,
+      resp_rate: 18,
+      spo2_pct: 97,
+      bp: {
+        systolic: 138,
+        diastolic: 84
+      },
+      blood_glucose_mmol_l: 7.2
+    }
+  }
+]
+
+=== Q3: Visits with any temperature reading of 38.0 C or more (searches inside the vitals arrays)
+[
+  {
+    hospital_no: 'OGH/2026/0007',
+    encounter_type: 'outpatient',
+    recorded_at: ISODate('2026-10-01T09:00:00.000Z')
+  },
+  {
+    hospital_no: 'OGH/2026/0003',
+    encounter_type: 'outpatient',
+    recorded_at: ISODate('2026-10-02T08:00:00.000Z')
+  },
+  {
+    hospital_no: 'OGH/2026/0003',
+    encounter_type: 'admission',
+    recorded_at: ISODate('2026-10-02T09:00:00.000Z')
+  },
+  {
+    hospital_no: 'OGH/2026/0002',
+    encounter_type: 'outpatient',
+    recorded_at: ISODate('2026-10-02T10:00:00.000Z')
+  },
+  {
+    hospital_no: 'OGH/2026/0005',
+    encounter_type: 'outpatient',
+    recorded_at: ISODate('2026-10-05T09:00:00.000Z')
+  },
+  {
+    hospital_no: 'OGH/2026/0005',
+    encounter_type: 'admission',
+    recorded_at: ISODate('2026-10-05T10:00:00.000Z')
+  }
+]
+
+=== Q4: Highest temperature and lowest oxygen saturation per patient
+[
+  {
+    _id: 'OGH/2026/0003',
+    readings: 5,
+    highest_temperature_c: 39.8,
+    lowest_spo2_pct: null
+  },
+  {
+    _id: 'OGH/2026/0005',
+    readings: 5,
+    highest_temperature_c: 38.9,
+    lowest_spo2_pct: 91
+  },
+  {
+    _id: 'OGH/2026/0007',
+    readings: 1,
+    highest_temperature_c: 38.6,
+    lowest_spo2_pct: null
+  },
+  {
+    _id: 'OGH/2026/0002',
+    readings: 1,
+    highest_temperature_c: 38.2,
+    lowest_spo2_pct: null
+  },
+  {
+    _id: 'OGH/2026/0008',
+    readings: 1,
+    highest_temperature_c: 37.6,
+    lowest_spo2_pct: null
+  },
+  {
+    _id: 'OGH/2026/0006',
+    readings: 1,
+    highest_temperature_c: 37.4,
+    lowest_spo2_pct: null
+  },
+  {
+    _id: 'OGH/2026/0004',
+    readings: 4,
+    highest_temperature_c: 36.9,
+    lowest_spo2_pct: null
+  },
+  {
+    _id: 'OGH/2026/0001',
+    readings: 1,
+    highest_temperature_c: null,
+    lowest_spo2_pct: null
+  }
+]
+
+=== Q5: Notes that mention malaria (text index over the note sections)
+[
+  {
+    hospital_no: 'OGH/2026/0003',
+    encounter_type: 'outpatient',
+    recorded_at: ISODate('2026-10-02T08:00:00.000Z')
+  },
+  {
+    hospital_no: 'OGH/2026/0002',
+    encounter_type: 'outpatient',
+    recorded_at: ISODate('2026-10-02T10:00:00.000Z')
+  }
+]
+
+=== Q6: Patients with a parent or sibling with hypertension or diabetes
+[
+  {
+    hospital_no: 'OGH/2026/0001',
+    family_history: [
+      {
+        relative: 'father',
+        condition: 'Hypertension'
+      },
+      {
+        relative: 'father',
+        condition: 'Stroke',
+        note: 'Died aged 70'
+      }
+    ]
+  },
+  {
+    hospital_no: 'OGH/2026/0005',
+    family_history: [
+      {
+        relative: 'mother',
+        condition: 'Type 2 diabetes mellitus'
+      },
+      {
+        relative: 'brother',
+        condition: 'Type 2 diabetes mellitus'
+      },
+      {
+        relative: 'father',
+        condition: 'Hypertension'
+      }
+    ]
+  },
+  {
+    hospital_no: 'OGH/2026/0008',
+    family_history: [
+      {
+        relative: 'father',
+        condition: 'Hypertension'
+      }
+    ]
+  }
+]
+
+=== Q7: Index use for Q1 (winning plan)
+{
+  stages: [
+    'FETCH',
+    'IXSCAN (hospital_no_1_recorded_at_-1)'
+  ],
+  documents_examined: 2,
+  documents_returned: 2
+}
+
+=== Q8: A new kind of reading needs no schema change (head circumference for a baby)
+{
+  inserted: true
+}
+
+=== Q9: The validator still rejects a document without the required fields
+Rejected: Document failed validation
+
+=== Q10: But nothing checks that the patient exists, as a PostgreSQL foreign key would
+{
+  inserted: true
+}
+
+--- Remove the demo documents
+{
+  deleted: 2
+}
