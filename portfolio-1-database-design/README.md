@@ -253,8 +253,6 @@ Screenshots taken on my machine running PostgreSQL 18.
 
 **Constraint tests.** Each test announces what it tries; test 2 (a valid booking) succeeds, and the others are refused by the named constraint or trigger. The full output for all 26 tests is in [`evidence/constraint_tests_output.txt`](evidence/constraint_tests_output.txt).
 
-![Constraint tests running](evidence/constraint-tests-run.png)
-
 **Invoice balances.** `invoice_balance_view` calculates each invoice's total, amount paid and balance from the invoice lines and payments: five are fully paid, one is part paid (₦4,860 outstanding) and one is unpaid (₦8,500).
 
 ![Invoice balances](evidence/invoice-balances.png)
@@ -267,6 +265,6 @@ Screenshots taken on my machine running PostgreSQL 18.
 | `seed.sql` | Sample data for every table: 16 staff, 10 patients, appointments, admissions, lab results, prescriptions, pharmacy stock, invoices and the September 2026 payroll. Runs in one transaction and can be re-run safely |
 | `constraint_tests.sql` | 26 tests: 23 try to break the hospital's business rules (double-booking, overfilling beds, negative stock, duplicate patients and staff, duplicate payslips and more) and show the database refuses them; 3 show the duplicate-patient check at registration. Every test is rolled back, so no data changes |
 | `evidence/constraint_tests_output.txt` | Full output from running the constraint tests |
-| `evidence/*.png` | Screenshots of the seed data loading, the constraint tests running and the invoice balances (section 6) |
+| `evidence/*.png` | Screenshots of the seed data loading and the invoice balances (section 6) |
 | `er-diagram/` | PNG export of each ER diagram page, shown in section 2 |
 | `er-diagram.drawio` | Editable ER diagram in seven pages: a module overview, then one page per module (Organisation, Patients, Clinical care, Pharmacy, Billing, Payroll). Open with draw.io or the VS Code Draw.io Integration extension |
