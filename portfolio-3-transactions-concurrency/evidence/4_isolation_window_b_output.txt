@@ -1,0 +1,24 @@
+SET
+
+=== ISOLATION, WINDOW B: the patient pays at the cashier while window A is reading
+
+Do step 1 in window A first, then press Enter here for step 2: INSERT INTO payment (invoice_id, amount, method, reference, received_by)
+SELECT invoice.invoice_id, 1000.00, 'cash', 'P3-ISO-0001', staff.staff_id
+FROM invoice
+JOIN staff ON staff.staff_no = 'OGH-0014'
+WHERE invoice.invoice_no = 'INV-2026-000003';
+INSERT 0 1
+A payment of 1,000 naira is saved and committed straight away (autocommit).
+
+>>> Next: step 3 in window A
+Do step 3 in window A first, then press Enter here for step 4: INSERT INTO payment (invoice_id, amount, method, reference, received_by)
+SELECT invoice.invoice_id, 1000.00, 'cash', 'P3-ISO-0002', staff.staff_id
+FROM invoice
+JOIN staff ON staff.staff_no = 'OGH-0014'
+WHERE invoice.invoice_no = 'INV-2026-000003';
+INSERT 0 1
+A second payment of 1,000 naira is saved and committed.
+
+>>> Next: step 5 in window A
+
+=== Done in window B.

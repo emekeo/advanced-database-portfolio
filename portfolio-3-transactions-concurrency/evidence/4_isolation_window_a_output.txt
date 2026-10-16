@@ -1,0 +1,75 @@
+SET
+DELETE 0
+
+=== ISOLATION, WINDOW A: billing officer checks how much has been paid on INV-2026-000003, twice in one transaction
+Start 4_isolation_window_b.sql in a second window, then follow the steps.
+
+##### PART 1: READ COMMITTED (the PostgreSQL default)
+Once window B is open, press Enter here for step 1: BEGIN ISOLATION LEVEL READ COMMITTED;
+BEGIN
+SELECT SUM(payment.amount) AS amount_paid
+FROM payment
+JOIN invoice ON invoice.invoice_id = payment.invoice_id
+WHERE invoice.invoice_no = 'INV-2026-000003';
+ amount_paid 
+-------------
+     8000.00
+(1 row)
+
+
+>>> Next: step 2 in window B
+Do step 2 in window B first, then press Enter here for step 3: SELECT SUM(payment.amount) AS amount_paid
+FROM payment
+JOIN invoice ON invoice.invoice_id = payment.invoice_id
+WHERE invoice.invoice_no = 'INV-2026-000003';
+ amount_paid 
+-------------
+     9000.00
+(1 row)
+
+COMMIT;
+COMMIT
+Same query, same transaction, different answer: a non-repeatable read.
+
+##### PART 2: REPEATABLE READ
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+SELECT SUM(payment.amount) AS amount_paid
+FROM payment
+JOIN invoice ON invoice.invoice_id = payment.invoice_id
+WHERE invoice.invoice_no = 'INV-2026-000003';
+ amount_paid 
+-------------
+     9000.00
+(1 row)
+
+
+>>> Next: step 4 in window B
+Do step 4 in window B first, then press Enter here for step 5: SELECT SUM(payment.amount) AS amount_paid
+FROM payment
+JOIN invoice ON invoice.invoice_id = payment.invoice_id
+WHERE invoice.invoice_no = 'INV-2026-000003';
+ amount_paid 
+-------------
+     9000.00
+(1 row)
+
+COMMIT;
+COMMIT
+The answer did not change: the transaction keeps reading the snapshot taken at its first query.
+
+--- After COMMIT, a new query sees the second payment
+SELECT SUM(payment.amount) AS amount_paid
+FROM payment
+JOIN invoice ON invoice.invoice_id = payment.invoice_id
+WHERE invoice.invoice_no = 'INV-2026-000003';
+ amount_paid 
+-------------
+    10000.00
+(1 row)
+
+
+--- Remove the two demo payments
+DELETE 2
+
+=== Done.

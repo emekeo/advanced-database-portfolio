@@ -16,7 +16,7 @@ The full case study statement, covering the users, data stored and key operation
 |---|----------|--------|
 | 1 | Database Design and Modelling | [portfolio-1-database-design](portfolio-1-database-design/) |
 | 2 | Query Processing and Optimisation | [portfolio-2-query-optimisation](portfolio-2-query-optimisation/) |
-| 3 | Transactions and Concurrency | – |
+| 3 | Transactions and Concurrency | [portfolio-3-transactions-concurrency](portfolio-3-transactions-concurrency/) |
 | 4 | NoSQL and Advanced Data Models | – |
 | 5 | Distributed and Cloud Database | – |
 

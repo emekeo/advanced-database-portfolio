@@ -1,0 +1,53 @@
+SET
+
+=== ROLLBACK: the pharmacist types 10 doses instead of 1, which is more than the prescription allows
+
+--- Before the transaction
+ quantity_on_hand | prescribed | quantity_dispensed 
+------------------+------------+--------------------
+               74 |          7 |                  4
+(1 row)
+
+BEGIN;
+BEGIN
+UPDATE medicine
+SET quantity_on_hand = medicine.quantity_on_hand - 10
+WHERE medicine.medicine_id = 11;
+UPDATE 1
+INSERT INTO stock_movement (medicine_id, movement_type, quantity, prescription_id, recorded_by)
+SELECT 11, 'dispensed', -10, 6, staff.staff_id
+FROM staff
+WHERE staff.staff_no = 'OGH-0012';
+INSERT 0 1
+SELECT medicine.quantity_on_hand AS stock_inside_transaction
+FROM medicine
+WHERE medicine.medicine_id = 11;
+ stock_inside_transaction 
+--------------------------
+                       64
+(1 row)
+
+UPDATE prescription_item
+SET quantity_dispensed = prescription_item.quantity_dispensed + 10
+WHERE prescription_item.prescription_id = 6
+  AND prescription_item.medicine_id = 11;
+psql:portfolio-3-transactions-concurrency/2_rollback.sql:43: ERROR:  new row for relation "prescription_item" violates check constraint "prescription_item_check"
+DETAIL:  Failing row contains (6, 11, 1g IV, once daily, 7, 7, 14).
+SELECT medicine.quantity_on_hand
+FROM medicine
+WHERE medicine.medicine_id = 11;
+psql:portfolio-3-transactions-concurrency/2_rollback.sql:47: ERROR:  current transaction is aborted, commands ignored until end of transaction block
+ROLLBACK;
+ROLLBACK
+
+--- After ROLLBACK: the stock update and the stock movement were undone as well
+ quantity_on_hand | prescribed | quantity_dispensed 
+------------------+------------+--------------------
+               74 |          7 |                  4
+(1 row)
+
+ movements_of_minus_10 
+-----------------------
+                     0
+(1 row)
+
