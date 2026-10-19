@@ -1,0 +1,111 @@
+=== Collections created with a validator on the fields every document must have
+[
+  'patient_background',
+  'clinical_record'
+]
+
+=== Documents loaded
+{
+  clinical_record: 11,
+  patient_background: 10
+}
+
+=== Indexes on clinical_record
+[
+  '_id_',
+  'hospital_no_1_recorded_at_-1',
+  'notes.complaint_text_notes.examination_text_notes.plan_text_notes.progress.text_text'
+]
+
+=== One outpatient document and one admission document, to show how the shape differs
+{
+  hospital_no: 'OGH/2026/0007',
+  encounter_type: 'outpatient',
+  recorded_at: ISODate('2026-10-01T09:00:00.000Z'),
+  doctor: 'OGH-0005',
+  vitals: [
+    {
+      taken_at: ISODate('2026-10-01T08:45:00.000Z'),
+      taken_by: 'OGH-0007',
+      temperature_c: 38.6,
+      pulse_bpm: 102,
+      bp: {
+        systolic: 120,
+        diastolic: 80
+      }
+    }
+  ],
+  notes: {
+    complaint: 'Fever and abdominal pain for 5 days, loss of appetite.',
+    examination: 'Febrile, mild tenderness in the right lower abdomen. No guarding.',
+    plan: 'Widal and full blood count. Treat as typhoid fever with oral ciprofloxacin. Return if pain worsens.'
+  }
+}
+{
+  hospital_no: 'OGH/2026/0004',
+  encounter_type: 'admission',
+  recorded_at: ISODate('2026-10-04T01:00:00.000Z'),
+  doctor: 'OGH-0003',
+  ward: 'Maternity Ward',
+  vitals: [
+    {
+      taken_at: ISODate('2026-10-04T01:00:00.000Z'),
+      taken_by: 'OGH-0006',
+      bp: {
+        systolic: 124,
+        diastolic: 82
+      },
+      pulse_bpm: 90,
+      foetal_heart_bpm: 140,
+      cervical_dilation_cm: 5
+    },
+    {
+      taken_at: ISODate('2026-10-04T05:00:00.000Z'),
+      taken_by: 'OGH-0006',
+      bp: {
+        systolic: 126,
+        diastolic: 84
+      },
+      pulse_bpm: 94,
+      foetal_heart_bpm: 138,
+      cervical_dilation_cm: 9
+    },
+    {
+      taken_at: ISODate('2026-10-04T08:00:00.000Z'),
+      taken_by: 'OGH-0006',
+      bp: {
+        systolic: 118,
+        diastolic: 76
+      },
+      pulse_bpm: 86,
+      temperature_c: 36.9
+    }
+  ],
+  delivery: {
+    at: ISODate('2026-10-04T06:20:00.000Z'),
+    mode: 'spontaneous vaginal',
+    baby: {
+      sex: 'M',
+      weight_kg: 3.4,
+      apgar: [
+        8,
+        9
+      ]
+    },
+    blood_loss_ml: 250
+  },
+  notes: {
+    progress: [
+      {
+        at: ISODate('2026-10-04T06:30:00.000Z'),
+        by: 'OGH-0003',
+        text: 'Normal delivery of a baby boy. Mother and baby well.'
+      },
+      {
+        at: ISODate('2026-10-06T09:30:00.000Z'),
+        by: 'OGH-0003',
+        text: 'Breastfeeding well. Discharge, postnatal clinic in 6 weeks.'
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+=== Replica set members at 2026-10-19T09:17:14.563Z
+[
+  {
+    node: 'localhost:27018',
+    state: '(not reachable/healthy)',
+    health: 0
+  },
+  {
+    node: 'localhost:27019',
+    state: 'PRIMARY',
+    health: 1
+  },
+  {
+    node: 'localhost:27020',
+    state: 'SECONDARY',
+    health: 1
+  }
+]
+
+=== What each member holds for inpatient OGH/2026/0005
+{
+  node: 'localhost:27018',
+  error: 'not reachable'
+}
+{
+  node: 'localhost:27019',
+  readings_on_this_node: 10,
+  latest_reading_at: ISODate('2026-10-19T09:14:03.842Z')
+}
+{
+  node: 'localhost:27020',
+  readings_on_this_node: 10,
+  latest_reading_at: ISODate('2026-10-19T09:14:03.842Z')
+}

@@ -1,0 +1,24 @@
+=== Start the replica set ojougboh_rs with three members
+Replica set initiated
+
+=== Wait for the members to elect a primary and for both secondaries to copy it
+[
+  {
+    node: 'localhost:27018',
+    state: 'PRIMARY',
+    health: 1,
+    votes: 1
+  },
+  {
+    node: 'localhost:27019',
+    state: 'SECONDARY',
+    health: 1,
+    votes: 1
+  },
+  {
+    node: 'localhost:27020',
+    state: 'SECONDARY',
+    health: 1,
+    votes: 1
+  }
+]

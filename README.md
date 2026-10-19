@@ -18,10 +18,9 @@ The full case study statement, covering the users, data stored and key operation
 | 2 | Query Processing and Optimisation | [portfolio-2-query-optimisation](portfolio-2-query-optimisation/) |
 | 3 | Transactions and Concurrency | [portfolio-3-transactions-concurrency](portfolio-3-transactions-concurrency/) |
 | 4 | NoSQL and Advanced Data Models | [portfolio-4-nosql](portfolio-4-nosql/) |
-| 5 | Distributed and Cloud Database | – |
+| 5 | Distributed and Cloud Database | [portfolio-5-distributed](portfolio-5-distributed/) |
 
 ## Tools
 
 - PostgreSQL 18 (portfolios 1–3)
-- MongoDB Community Server + mongosh (portfolio 4)
-- MongoDB Atlas (portfolio 5)
+- MongoDB Community Server + mongosh (portfolios 4–5)

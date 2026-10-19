@@ -1,0 +1,28 @@
+=== A nurse records a new vitals reading for inpatient OGH/2026/0005
+The application writes to the primary, localhost:27019, and waits for a majority of members to confirm
+{
+  written_at: ISODate('2026-10-19T09:17:24.525Z'),
+  modified: 1,
+  acknowledged: true
+}
+
+=== One second later, read the admission back from every member directly
+{
+  node: 'localhost:27018',
+  state: '(not reachable/healthy)',
+  error: 'not reachable'
+}
+{
+  node: 'localhost:27019',
+  state: 'PRIMARY',
+  readings_on_this_node: 11,
+  latest_reading_at: ISODate('2026-10-19T09:17:24.525Z'),
+  has_the_new_reading: true
+}
+{
+  node: 'localhost:27020',
+  state: 'SECONDARY',
+  readings_on_this_node: 11,
+  latest_reading_at: ISODate('2026-10-19T09:17:24.525Z'),
+  has_the_new_reading: true
+}
